@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>正計時器</title>
+    <style>
+        /* 基本樣式 */
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            position: relative; /* 讓底部內容可以相對定位 */
+        }
+
+        /* 時間顯示 */
+        .timer {
+            font-size: 8rem;
+            text-align: center;
+            flex-grow: 1; /* 讓時間佔據剩餘空間 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 底部容器 */
+        .bottom-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* 勾選框 */
+        .checkbox-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .checkbox-group label {
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* 輸入框容器 */
+        .input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* 輸入框 */
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .input-group label {
+            font-size: 1.2rem;
+            width: 80px; /* 與輸入框同寬 */
+            text-align: right; /* 文字靠右對齊 */
+        }
+
+        .input-group input {
+            font-size: 1.5rem;
+            padding: 10px;
+            border-radius: 5px;
+            border: 2px solid #4CAF50;
+            background-color: #1e1e1e;
+            color: white;
+            text-align: center;
+            width: 80px; /* 固定寬度 */
+        }
+
+        /* 停止時間輸入框 */
+        .stop-time-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .stop-time-group label {
+            font-size: 1.2rem;
+            width: 80px; /* 與輸入框同寬 */
+            text-align: right; /* 文字靠右對齊 */
+        }
+
+        .stop-time-group input {
+            font-size: 1.5rem;
+            padding: 10px;
+            border-radius: 5px;
+            border: 2px solid #4CAF50;
+            background-color: #1e1e1e;
+            color: white;
+            text-align: center;
+            width: 80px; /* 與輸入框同寬 */
+        }
+
+        /* 按鈕 */
+        .button-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .mode-label {
+            font-size: 1.5rem;
+            margin-right: 20px; /* 與按鈕保持距離 */
+        }
+
+        button {
+            font-size: 1.5rem;
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        #startButton {
+            background-color: #4CAF50;
+        }
+
+        #pauseButton {
+            background-color: #ff9800;
+            display: none; /* 初始隱藏 */
+        }
+
+        #resumeButton {
+            background-color: #4CAF50;
+            display: none; /* 初始隱藏 */
+        }
+
+        #resetButton {
+            background-color: #f44336;
+        }
+
+        /* 全螢幕模式下的樣式 */
+        :fullscreen .bottom-container {
+            display: none; /* 隱藏底部內容 */
+        }
+
+        :fullscreen .timer {
+            font-size: 12rem; /* 加大時間顯示 */
+        }
+    </style>
+</head>
+<body>
+    <!-- 時間顯示 -->
+    <div class="timer" id="timer">00:00:00</div>
+
+    <!-- 底部容器 -->
+    <div class="bottom-container">
+        <!-- 勾選框 -->
+        <div class="checkbox-group">
+            <label>
+                <input type="checkbox" id="showHours" checked> 小時
+            </label>
+            <label>
+                <input type="checkbox" id="showMinutes" checked> 分鐘
+            </label>
+            <label>
+                <input type="checkbox" id="showSeconds" checked> 秒數
+            </label>
+        </div>
+
+        <!-- 輸入框容器 -->
+        <div class="input-container">
+            <!-- 輸入時間 -->
+            <div class="input-group">
+                <label>輸入時間：</label>
+                <input type="number" id="hours" placeholder="小時" min="0" max="99" maxlength="2" value="0">
+                <input type="number" id="minutes" placeholder="分鐘" min="0" max="59" maxlength="2" value="0">
+                <input type="number" id="seconds" placeholder="秒數" min="0" max="59" maxlength="2" value="0">
+            </div>
+
+            <!-- 停止時間 -->
+            <div class="stop-time-group">
+                <label>停止時間：</label>
+                <input type="number" id="stopHours" placeholder="小時" min="0" max="99" maxlength="2" value="0">
+                <input type="number" id="stopMinutes" placeholder="分鐘" min="0" max="59" maxlength="2" value="0">
+                <input type="number" id="stopSeconds" placeholder="秒數" min="0" max="59" maxlength="2" value="0">
+            </div>
+        </div>
+
+        <!-- 按鈕 -->
+        <div class="button-row">
+            <div class="mode-label">正計時</div>
+            <button id="startButton">開始 <small>S</small></button>
+            <button id="pauseButton">暫停 <small>space</small></button>
+            <button id="resumeButton">接續 <small>space</small></button>
+            <button id="resetButton">重置 <small>R</small></button>
+        </div>
+	<div style="font-size: 1rem; color: #888; margin-top: 20px;">
+        雙擊頁面全螢幕、再次雙擊頁面退出全螢幕模式
+    </div>
+    </div>
+
+    <script>
+        let timerInterval;
+        let startTime;
+        let elapsedTime = 0;
+        let isRunning = false;
+        let stopTime = 0; // 停止時間（毫秒）
+
+        const timerElement = document.getElementById('timer');
+        const startButton = document.getElementById('startButton');
+        const pauseButton = document.getElementById('pauseButton');
+        const resumeButton = document.getElementById('resumeButton');
+        const resetButton = document.getElementById('resetButton');
+        const hoursInput = document.getElementById('hours');
+        const minutesInput = document.getElementById('minutes');
+        const secondsInput = document.getElementById('seconds');
+        const stopHoursInput = document.getElementById('stopHours');
+        const stopMinutesInput = document.getElementById('stopMinutes');
+        const stopSecondsInput = document.getElementById('stopSeconds');
+        const showHoursCheckbox = document.getElementById('showHours');
+        const showMinutesCheckbox = document.getElementById('showMinutes');
+        const showSecondsCheckbox = document.getElementById('showSeconds');
+
+        // 格式化時間（根據勾選框顯示對應部分）
+        function formatTime(milliseconds) {
+            const hours = Math.floor(milliseconds / 3600000);
+            const minutes = Math.floor((milliseconds % 3600000) / 60000);
+            const seconds = Math.floor((milliseconds % 60000) / 1000);
+
+            let timeString = '';
+            if (showHoursCheckbox.checked) {
+                timeString += String(hours).padStart(2, '0') + ':';
+            }
+            if (showMinutesCheckbox.checked) {
+                timeString += String(minutes).padStart(2, '0') + ':';
+            }
+            if (showSecondsCheckbox.checked) {
+                timeString += String(seconds).padStart(2, '0');
+            }
+            return timeString || '00:00:00';
+        }
+
+        // 更新計時器顯示
+        function updateTimer() {
+            const currentTime = Date.now();
+            elapsedTime = currentTime - startTime;
+            timerElement.textContent = formatTime(elapsedTime);
+
+            // 檢查是否達到停止時間
+            if (stopTime > 0 && elapsedTime >= stopTime) {
+                clearInterval(timerInterval);
+                isRunning = false;
+                timerElement.textContent = formatTime(stopTime); // 直接顯示停止時間
+                startButton.style.display = 'inline-block';
+                pauseButton.style.display = 'none';
+                resumeButton.style.display = 'none';
+            }
+        }
+
+        // 開始計時器
+        function startTimer() {
+            const hours = parseInt(hoursInput.value) || 0;
+            const minutes = parseInt(minutesInput.value) || 0;
+            const seconds = parseInt(secondsInput.value) || 0;
+            elapsedTime = (hours * 3600000) + (minutes * 60000) + (seconds * 1000);
+
+            // 設定停止時間
+            const stopHours = parseInt(stopHoursInput.value) || 0;
+            const stopMinutes = parseInt(stopMinutesInput.value) || 0;
+            const stopSeconds = parseInt(stopSecondsInput.value) || 0;
+            stopTime = (stopHours * 3600000) + (stopMinutes * 60000) + (stopSeconds * 1000);
+
+            // 清空輸入框
+            hoursInput.value = '';
+            minutesInput.value = '';
+            secondsInput.value = '';
+
+            startTime = Date.now() - elapsedTime;
+            timerInterval = setInterval(updateTimer, 1000);
+            startButton.style.display = 'none';
+            pauseButton.style.display = 'inline-block';
+            resumeButton.style.display = 'none';
+            isRunning = true;
+        }
+
+        // 暫停計時器
+        function pauseTimer() {
+            clearInterval(timerInterval);
+            pauseButton.style.display = 'none';
+            resumeButton.style.display = 'inline-block';
+            isRunning = false;
+        }
+
+        // 接續計時器
+        function resumeTimer() {
+            startTime = Date.now() - elapsedTime;
+            timerInterval = setInterval(updateTimer, 1000);
+            pauseButton.style.display = 'inline-block';
+            resumeButton.style.display = 'none';
+            isRunning = true;
+        }
+
+        // 重置計時器
+        function resetTimer() {
+            clearInterval(timerInterval);
+            elapsedTime = 0;
+            stopTime = 0;
+            hoursInput.value = '0';
+            minutesInput.value = '0';
+            secondsInput.value = '0';
+            stopHoursInput.value = '0';
+            stopMinutesInput.value = '0';
+            stopSecondsInput.value = '0';
+            startButton.style.display = 'inline-block';
+            pauseButton.style.display = 'none';
+            resumeButton.style.display = 'none';
+            isRunning = false;
+            timerElement.textContent = formatTime(elapsedTime); // 根據勾選框狀態更新顯示
+        }
+
+        // 監聽按鈕點擊事件
+        startButton.addEventListener('click', startTimer);
+        pauseButton.addEventListener('click', pauseTimer);
+        resumeButton.addEventListener('click', resumeTimer);
+        resetButton.addEventListener('click', resetTimer);
+
+        // 監聽鍵盤事件
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 's' || event.key === 'S') {
+                startTimer(); // 開始
+            } else if (event.key === ' ') {
+                if (isRunning) {
+                    pauseTimer(); // 暫停
+                } else {
+                    resumeTimer(); // 接續
+                }
+            } else if (event.key === 'r' || event.key === 'R') {
+                resetTimer(); // 重置
+            }
+        });
+
+        // 動態顯示/隱藏輸入框和計時器部分
+        function toggleInputDisplay() {
+            hoursInput.style.display = showHoursCheckbox.checked ? 'block' : 'none';
+            minutesInput.style.display = showMinutesCheckbox.checked ? 'block' : 'none';
+            secondsInput.style.display = showSecondsCheckbox.checked ? 'block' : 'none';
+
+            // 隱藏停止時間的對應輸入框
+            stopHoursInput.style.display = showHoursCheckbox.checked ? 'block' : 'none';
+            stopMinutesInput.style.display = showMinutesCheckbox.checked ? 'block' : 'none';
+            stopSecondsInput.style.display = showSecondsCheckbox.checked ? 'block' : 'none';
+
+            timerElement.textContent = formatTime(elapsedTime); // 更新計時器顯示
+        }
+
+        // 監聽勾選框的變化
+        showHoursCheckbox.addEventListener('change', toggleInputDisplay);
+        showMinutesCheckbox.addEventListener('change', toggleInputDisplay);
+        showSecondsCheckbox.addEventListener('change', toggleInputDisplay);
+
+        // 初始化顯示
+        toggleInputDisplay();
+        timerElement.textContent = formatTime(0); // 初始顯示為 00:00:00
+
+        // 進入全螢幕模式
+        document.addEventListener('dblclick', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        });
+    </script>
+</body>
+</html>
