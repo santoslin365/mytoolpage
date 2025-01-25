@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小工具集合</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        .tool-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+        .tool-card {
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .tool-card h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #4CAF50;
+        }
+        .tool-card p {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+        .tool-card a {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 1.2rem;
+        }
+        .tool-card a:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>小工具集合</h1>
+    <div class="tool-list">
+        <!-- 計數器 -->
+        <div class="tool-card">
+            <h2>計數器</h2>
+            <p>一個簡單的計數器，支援 +1、+2、-1、-2 操作，並可儲存三次計數值。</p>
+            <a href="counter.html">前往計數器</a>
+        </div>
+
+        <!-- 正/反 計時器 -->
+        <div class="tool-card">
+            <h2>正/反 計時器</h2>
+            <p>提供正計時與倒計時功能，適用於活動倒數、運動計時等場景。</p>
+            <a href="countdown.html">前往計時器</a>
+        </div>
+
+        <!-- 計分板 -->
+        <div class="tool-card">
+            <h2>計分板</h2>
+            <p>適用於比賽或活動，支援分數調整與重置功能。</p>
+            <a href="scoreboard.html">前往計分板</a>
+        </div>
+
+        <!-- 多人用計分器 -->
+        <div class="tool-card">
+            <h2>多人用計分器</h2>
+            <p>適用於多人比賽或活動，可同時記錄多個隊伍或選手的得分。</p>
+            <a href="multiplayer-score.html">前往計分器</a>
+        </div>
+    </div>
+</body>
+</html>
