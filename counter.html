@@ -23,26 +23,39 @@
         .counter {
             font-size: 9rem; /* 加大為原來的 3 倍 */
             margin-bottom: 20px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .saved-counts {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 1.2rem;
         }
         .buttons {
+            position: absolute;
+            bottom: 20px;
+            right: 20px; /* 靠右對齊 */
             display: flex;
             flex-direction: column;
+            align-items: flex-end; /* 按鈕靠右 */
             gap: 10px;
-            align-items: center;
         }
         .button-row {
             display: flex;
-            gap: 20px;
+            gap: 10px; /* 按鈕間距縮小 */
         }
         button {
-            font-size: 1.5rem;
-            padding: 15px 30px; /* 統一按鈕大小 */
+            font-size: 1rem; /* 字體縮小 */
+            padding: 8px 10px; /* 按鈕尺寸縮小一半 */
             cursor: pointer;
             border: none;
             border-radius: 5px;
             background-color: #4CAF50; /* 一般按鈕背景顏色 */
             color: white; /* 按鈕文字顏色 */
-            width: 120px; /* 統一按鈕寬度 */
+            width: 60px; /* 按鈕寬度縮小一半 */
             text-align: center;
         }
         button:hover {
@@ -54,18 +67,39 @@
         .reset-button:hover {
             background-color: #d32f2f; /* 重置按鈕懸停時的背景顏色 */
         }
-        .saved-counts {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 1.2rem;
-        }
         .clear-button {
             margin-top: 10px;
             background-color: #ff9800; /* 清除按鈕背景顏色 */
         }
         .clear-button:hover {
             background-color: #e68900; /* 清除按鈕懸停時的背景顏色 */
+        }
+        .input-section {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end; /* 輸入框和讀取按鈕靠右 */
+        }
+        .input-section input {
+            font-size: 1rem; /* 字體縮小 */
+            padding: 8px;
+            width: 80px; /* 輸入框寬度縮小 */
+            text-align: center;
+            border: 2px solid #4CAF50;
+            border-radius: 5px;
+            background-color: black;
+            color: white;
+        }
+        .input-section button {
+            background-color: #2196F3; /* 讀取按鈕背景顏色 */
+        }
+        .input-section button:hover {
+            background-color: #1e88e5; /* 讀取按鈕懸停時的背景顏色 */
+        }
+        /* 全螢幕時隱藏其他元素 */
+        .fullscreen .buttons,
+        .fullscreen .saved-counts,
+        .fullscreen .input-section {
+            display: none;
         }
     </style>
 </head>
@@ -81,20 +115,32 @@
     <!-- 當前計數器 -->
     <div class="counter" id="counter">0</div>
 
-    <!-- 操作按鈕 -->
+    <!-- 操作按鈕與輸入框 -->
     <div class="buttons">
+        <!-- 第四列：+1 和 +2 -->
         <div class="button-row">
             <button id="btnPlus1">+1</button>
             <button id="btnPlus2">+2</button>
         </div>
+        <!-- 第三列：-1 和 -2 -->
         <div class="button-row">
             <button id="btnMinus1">-1</button>
             <button id="btnMinus2">-2</button>
         </div>
+        <!-- 第二列：儲存 和 重置 -->
         <div class="button-row">
-            <button id="btnSave">儲存</button> <!-- 儲存按鈕 -->
-            <button id="btnReset" class="reset-button">&#x21bb;</button> <!-- 重置按鈕 -->
+            <button id="btnSave">儲存</button>
+            <button id="btnReset" class="reset-button">重置 (R)</button>
         </div>
+        <!-- 第一列：輸入框 和 讀取 -->
+        <div class="input-section">
+            <input type="number" id="inputNumber" placeholder="輸入數字">
+            <button id="btnLoad">讀取</button>
+        </div>
+    <div style="font-size: 0.5rem; color: #888; margin-top: 0.5px;">雙擊為全螢幕模式、再次雙擊為退出全螢幕模式</div>
+    <div style="font-size: 0.5rem; color: #888; margin-top: 0.5px;">「+1」快捷鍵為「1」,「-1」快捷鍵為「Q」</div>
+    <div style="font-size: 0.5rem; color: #888; margin-top: 0.5px;">「+2」快捷鍵為「2」,「-2」快捷鍵為「W」</div>
+    <div style="font-size: 0.5rem; color: #888; margin-top: 0.5px;">重置快捷鍵為「R」</div>
     </div>
 
     <script>
@@ -167,6 +213,53 @@
             // 清除儲存的計數值
             savedCounts = [0, 0, 0];
             updateSavedCounts();
+        });
+
+        // 雙擊進入/退出全螢幕
+        document.addEventListener('dblclick', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                document.body.classList.add('fullscreen');
+            } else {
+                document.exitFullscreen();
+                document.body.classList.remove('fullscreen');
+            }
+        });
+
+        // 快捷鍵功能
+        document.addEventListener('keydown', (event) => {
+            switch (event.key.toLowerCase()) {
+                case '1': // +1 快捷鍵
+                    count += 1;
+                    updateCounter();
+                    break;
+                case 'q': // -1 快捷鍵
+                    count -= 1;
+                    updateCounter();
+                    break;
+                case '2': // +2 快捷鍵
+                    count += 2;
+                    updateCounter();
+                    break;
+                case 'w': // -2 快捷鍵
+                    count -= 2;
+                    updateCounter();
+                    break;
+                case 'r': // 重置快捷鍵
+                    count = 0;
+                    updateCounter();
+                    break;
+            }
+        });
+
+        // 讀取按鈕功能
+        document.getElementById('btnLoad').addEventListener('click', () => {
+            const inputValue = document.getElementById('inputNumber').value;
+            if (inputValue !== '') {
+                count = parseInt(inputValue, 10);
+                updateCounter();
+                document.getElementById('inputNumber').value = ''; // 清空輸入框
+            }
         });
     </script>
 </body>
