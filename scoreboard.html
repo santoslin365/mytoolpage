@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>計分板</title>
+    <style>
+        html {
+            touch-action: manipulation; /* 禁用雙擊縮放 */
+        }
+        body {
+            background-color: black; /* 背景為黑色 */
+            color: white; /* 文字為白色 */
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            position: relative;
+        }
+
+        /* 計分板容器 */
+        .scoreboard {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px; /* 左右計分數字的間距 */
+            margin-bottom: 40px; /* 與下方位元數框的距離 */
+        }
+
+        /* 計分數字框 */
+        .score {
+            font-size: 9rem; /* 加大字體 */
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 150px; /* 最小寬度 */
+            transition: width 0.3s ease; /* 寬度變化動畫 */
+        }
+
+        /* 左邊計分數字框（預設紅色背景） */
+        .score-left {
+            background-color: red;
+        }
+
+        /* 右邊計分數字框（預設藍色背景） */
+        .score-right {
+            background-color: blue;
+        }
+
+        /* 位元數設置區域 */
+        .digit-settings {
+            display: flex;
+            flex-direction: column;
+            gap: 10px; /* 位元數框之間的間距 */
+            margin-bottom: 20px; /* 與下方按鈕的距離 */
+        }
+
+        /* 位元數框 */
+        .digit-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px; /* 文字與框的間距 */
+        }
+
+        /* 按鈕區域 */
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px; /* 按鈕列之間的間距 */
+            align-items: center; /* 按鈕靠中央對齊 */
+        }
+
+        /* 按鈕列 */
+        .button-row {
+            display: flex;
+            gap: 10px; /* 按鈕之間的間距 */
+        }
+
+        /* 按鈕樣式 */
+        button {
+            font-size: 1rem;
+            padding: 8px 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50; /* 預設按鈕背景顏色 */
+            color: white; /* 按鈕文字顏色 */
+            width: 80px; /* 固定按鈕寬度 */
+            text-align: center;
+        }
+
+        button:hover {
+            opacity: 0.8; /* 按鈕懸停效果 */
+        }
+
+        /* 重置按鈕樣式 */
+        .reset-button {
+            background-color: #f44336; /* 紅色背景 */
+        }
+
+        .reset-button:hover {
+            background-color: #d32f2f; /* 深紅色懸停效果 */
+        }
+
+        /* 全螢幕時隱藏其他元素 */
+        .fullscreen .digit-settings,
+        .fullscreen .button-container {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 計分板 -->
+    <div class="scoreboard">
+        <!-- 左邊計分數字框 -->
+        <div class="score score-left" id="scoreLeft">0</div>
+        <!-- 右邊計分數字框 -->
+        <div class="score score-right" id="scoreRight">0</div>
+    </div>
+
+    <!-- 位元數設置區域 -->
+    <div class="digit-settings">
+        <div class="digit-checkbox">
+            <input type="checkbox" id="hundredsDigit"> <label for="hundredsDigit">3位數</label>
+        </div>
+        <div class="digit-checkbox">
+            <input type="checkbox" id="tensDigit"> <label for="tensDigit">2位數</label>
+        </div>
+    </div>
+
+    <!-- 按鈕區域 -->
+    <div class="button-container">
+        <!-- 第一列按鈕 -->
+        <div class="button-row">
+            <button id="btnRedMinus1">-1 (R)</button>
+            <button id="btnRedPlus1">+1 (T)</button>
+            <button id="btnBluePlus1">+1 (Y)</button>
+            <button id="btnBlueMinus1">-1 (U)</button>
+        </div>
+        <!-- 第二列按鈕 -->
+        <div class="button-row">
+            <button id="btnRedMinus2">-2 (F)</button>
+            <button id="btnRedPlus2">+2 (G)</button>
+            <button id="btnBluePlus2">+2 (H)</button>
+            <button id="btnBlueMinus2">-2 (J)</button>
+        </div>
+        <!-- 第三列按鈕 -->
+        <div class="button-row">
+            <button id="btnRedMinus3">-3 (V)</button>
+            <button id="btnRedPlus3">+3 (B)</button>
+            <button id="btnBluePlus3">+3 (N)</button>
+            <button id="btnBlueMinus3">-3 (M)</button>
+        </div>
+        <!-- 第四列按鈕 -->
+        <div class="button-row">
+            <button id="btnRedReset" class="reset-button">重置 (O)</button>
+            <button id="btnBlueReset" class="reset-button">重置 (P)</button>
+        </div>
+    </div>
+
+    <script>
+        // 初始化計分
+        let redScore = 0;
+        let blueScore = 0;
+        const scoreLeftElement = document.getElementById('scoreLeft');
+        const scoreRightElement = document.getElementById('scoreRight');
+
+        // 更新計分顯示
+        function updateScore() {
+            scoreLeftElement.textContent = formatScore(redScore);
+            scoreRightElement.textContent = formatScore(blueScore);
+            adjustScoreWidth(scoreLeftElement);
+            adjustScoreWidth(scoreRightElement);
+        }
+
+        // 格式化計分數字（根據位數設置）
+        function formatScore(score) {
+            const hundredsDigit = document.getElementById('hundredsDigit').checked;
+            const tensDigit = document.getElementById('tensDigit').checked;
+
+            if (hundredsDigit) {
+                return score.toString().padStart(3, '0'); // 3位數
+            } else if (tensDigit) {
+                return score.toString().padStart(2, '0'); // 2位數
+            } else {
+                return score.toString(); // 單位數
+            }
+        }
+
+        // 動態調整計分框寬度
+        function adjustScoreWidth(element) {
+            const textLength = element.textContent.length;
+            if (textLength === 1) {
+                element.style.width = '150px'; // 單位數寬度
+            } else if (textLength === 2) {
+                element.style.width = '200px'; // 二位數寬度
+            } else if (textLength === 3) {
+                element.style.width = '250px'; // 三位數寬度
+            }
+        }
+
+        // 紅色方加減分
+        function updateRedScore(value) {
+            redScore += value;
+            if (redScore < 0) redScore = 0; // 防止負分
+            updateScore();
+        }
+
+        // 藍色方加減分
+        function updateBlueScore(value) {
+            blueScore += value;
+            if (blueScore < 0) blueScore = 0; // 防止負分
+            updateScore();
+        }
+
+        // 重置分數
+        function resetScore(isRed) {
+            if (isRed) {
+                redScore = 0;
+            } else {
+                blueScore = 0;
+            }
+            updateScore();
+        }
+
+        // 按鈕事件綁定
+        document.getElementById('btnRedMinus1').addEventListener('click', () => updateRedScore(-1));
+        document.getElementById('btnRedPlus1').addEventListener('click', () => updateRedScore(1));
+        document.getElementById('btnBluePlus1').addEventListener('click', () => updateBlueScore(1));
+        document.getElementById('btnBlueMinus1').addEventListener('click', () => updateBlueScore(-1));
+
+        document.getElementById('btnRedMinus2').addEventListener('click', () => updateRedScore(-2));
+        document.getElementById('btnRedPlus2').addEventListener('click', () => updateRedScore(2));
+        document.getElementById('btnBluePlus2').addEventListener('click', () => updateBlueScore(2));
+        document.getElementById('btnBlueMinus2').addEventListener('click', () => updateBlueScore(-2));
+
+        document.getElementById('btnRedMinus3').addEventListener('click', () => updateRedScore(-3));
+        document.getElementById('btnRedPlus3').addEventListener('click', () => updateRedScore(3));
+        document.getElementById('btnBluePlus3').addEventListener('click', () => updateBlueScore(3));
+        document.getElementById('btnBlueMinus3').addEventListener('click', () => updateBlueScore(-3));
+
+        document.getElementById('btnRedReset').addEventListener('click', () => resetScore(true));
+        document.getElementById('btnBlueReset').addEventListener('click', () => resetScore(false));
+
+        // 快捷鍵功能
+        document.addEventListener('keydown', (event) => {
+            switch (event.key.toLowerCase()) {
+                case 'r': updateRedScore(-1); break;
+                case 't': updateRedScore(1); break;
+                case 'y': updateBlueScore(1); break;
+                case 'u': updateBlueScore(-1); break;
+                case 'f': updateRedScore(-2); break;
+                case 'g': updateRedScore(2); break;
+                case 'h': updateBlueScore(2); break;
+                case 'j': updateBlueScore(-2); break;
+                case 'v': updateRedScore(-3); break;
+                case 'b': updateRedScore(3); break;
+                case 'n': updateBlueScore(3); break;
+                case 'm': updateBlueScore(-3); break;
+                case 'o': resetScore(true); break;
+                case 'p': resetScore(false); break;
+            }
+        });
+
+        // 雙擊進入/退出全螢幕
+        document.addEventListener('dblclick', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                document.body.classList.add('fullscreen');
+            } else {
+                document.exitFullscreen();
+                document.body.classList.remove('fullscreen');
+            }
+        });
+
+        // 位數設置變更時更新計分顯示
+        document.getElementById('hundredsDigit').addEventListener('change', updateScore);
+        document.getElementById('tensDigit').addEventListener('change', updateScore);
+    </script>
+</body>
+</html>
